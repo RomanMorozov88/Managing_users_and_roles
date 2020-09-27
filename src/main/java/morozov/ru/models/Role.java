@@ -1,6 +1,7 @@
 package morozov.ru.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import morozov.ru.models.users.UserWithRoles;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -14,15 +15,23 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @Column(nullable = false, unique = true)
     private String name;
     @JsonIgnore
-    @ManyToMany(cascade = {CascadeType.ALL})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     @JoinTable(
             name = "users_roles",
             joinColumns = {@JoinColumn(name = "id")},
             inverseJoinColumns = {@JoinColumn(name = "login")}
     )
-    private Set<User> users = new HashSet<>();
+    private Set<UserWithRoles> users = new HashSet<>();
+
+    public Role() {
+    }
+
+    public Role(String name) {
+        this.name = name;
+    }
 
     public int getId() {
         return id;
@@ -40,26 +49,30 @@ public class Role {
         this.name = name;
     }
 
-    public Set<User> getUsers() {
+    public Set<UserWithRoles> getUsers() {
         return users;
     }
 
-    public void setUsers(Set<User> users) {
+    public void setUsers(Set<UserWithRoles> users) {
         this.users = users;
     }
 
+    /**
+     * Переопределяется так, что бы не учитывать Set<UserWithRoles> users.
+     * @param o
+     * @return
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || !(o instanceof Role)) return false;
         Role role = (Role) o;
         return id == role.id &&
-                Objects.equals(name, role.name) &&
-                Objects.equals(users, role.users);
+                Objects.equals(name, role.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, users);
+        return Objects.hash(id, name);
     }
 }
