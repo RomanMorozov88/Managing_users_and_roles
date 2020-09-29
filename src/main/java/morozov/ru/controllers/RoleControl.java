@@ -31,7 +31,7 @@ public class RoleControl {
      */
     @GetMapping("/muar/roles")
     public List<Role> getRoles() {
-        return roleService.getAll();
+        return this.roleService.getAll();
     }
 
     /**
@@ -46,19 +46,21 @@ public class RoleControl {
     public Role saveRole(@RequestBody Role role) {
         Role result = null;
         if (!this.validateService.checkRoles(role)) {
-            result = roleService.saveRole(role);
-            this.validateService.setExistingRoles(roleService.getAll());
+            result = this.roleService.saveRole(role);
+            this.validateService.setExistingRoles(this.roleService.getAll());
         }
         return result;
     }
 
     /**
      * Удаление роли.
+     * При удалении роли обновляется и список ролей, хранящийся в validateService.
      *
      * @param role
      */
     @DeleteMapping("/muar/roles/{role}")
     public void deleteRole(@PathVariable String role) {
-        roleService.deleteRole(role);
+        this.roleService.deleteRole(role);
+        this.validateService.setExistingRoles(this.roleService.getAll());
     }
 }
